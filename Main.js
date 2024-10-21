@@ -28,20 +28,40 @@ try {
   process.exit(1);
 }
 
-if (args.display) {
-  console.log('File content:');
-  console.log(fileContent);
+// Парсимо JSON
+let jsonData;
+try {
+  jsonData = JSON.parse(fileContent);
+} catch (error) {
+  console.error('Failed to parse JSON:', error.message);
+  process.exit(1);
 }
 
+// Обробка даних
+const results = jsonData.map(item => {
+  const stockCode = item.StockCode || 'UnknownStockCode';  // виправлено
+  const valCode = item.ValCode || 'UnknownValCode';        // виправлено
+  const attraction = item.Attraction || 0;
+  return `${stockCode}-${valCode}-${attraction}`;          // виправлено
+});
+
+// Вивід результатів
+if (args.display) {
+  console.log('Formatted results:');
+  results.forEach(result => console.log(result));
+}
+
+// Запис у файл, якщо зазначений
 if (args.output) {
   try {
-    fs.writeFileSync(args.output, fileContent, 'utf8');
+    fs.writeFileSync(args.output, results.join('\n'), 'utf8');
   } catch (error) {
     console.error('Failed to write output file:', error.message);
     process.exit(1);
   }
 }
 
+// Завершення, якщо не потрібно нічого виводити
 if (!args.display && !args.output) {
   process.exit(0);
 }
